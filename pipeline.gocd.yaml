@@ -1,0 +1,46 @@
+format_version: 10
+pipelines:
+  dnsmasq:
+    group: Docker-Images
+    label_template: ${COUNT}
+    lock_behavior: none
+    display_order: -1
+    materials:
+      git-09a77fb:
+        git: git@github.com:carlos-sarmiento/dnsmasq-alpine.git
+        shallow_clone: false
+        auto_update: true
+        branch: master
+    stages:
+    - docker-build-stage:
+        fetch_materials: true
+        keep_artifacts: false
+        clean_workspace: false
+        approval:
+          type: success
+          allow_only_on_success: false
+        jobs:
+          docker-build-job:
+            timeout: 0
+            tasks:
+            - exec:
+                arguments:
+                - build
+                - -t
+                - dnsmasq
+                - .
+                command: docker
+                run_if: passed
+            - exec:
+                arguments:
+                - tag
+                - dnsmasq
+                - registry.oripoto.pw/dnsmasq
+                command: docker
+                run_if: passed
+            - exec:
+                arguments:
+                - push
+                - registry.oripoto.pw/dnsmasq
+                command: docker
+                run_if: passed
